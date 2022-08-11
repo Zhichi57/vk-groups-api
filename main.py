@@ -80,29 +80,30 @@ async def find_groups(user_id, query, group_ids, save_db=False):
             db.add(new_query)
             db.commit()
             db.refresh(new_query)
-        for item in response.json()['response']['items']:
-            # Проверяется есть ли id группы в списке id групп пользователя или его друзей
-            if item['id'] in group_ids:
-                if save_db:
-                    new_group = Groups(
-                        name=item['name'],
-                        screen_name=item['screen_name'],
-                        is_closed=item['is_closed'],
-                        type=item['type'],
-                        query_id=new_query.id,
-                        user_id=user_id,
+        if 'response' in response.json() and 'items' in response.json()['response']:
+            for item in response.json()['response']['items']:
+                # Проверяется есть ли id группы в списке id групп пользователя или его друзей
+                if item['id'] in group_ids:
+                    if save_db:
+                        new_group = Groups(
+                            name=item['name'],
+                            screen_name=item['screen_name'],
+                            is_closed=item['is_closed'],
+                            type=item['type'],
+                            query_id=new_query.id,
+                            user_id=user_id,
 
-                    )
-                    db.add(new_group)
-                    db.commit()
-                    db.refresh(new_group)
-                result.append({
-                    'id': item['id'],
-                    'name': item['name'],
-                    'screen_name': item['screen_name'],
-                    'is_closed': item['is_closed'],
-                    'type': item['type'],
-                })
+                        )
+                        db.add(new_group)
+                        db.commit()
+                        db.refresh(new_group)
+                    result.append({
+                        'id': item['id'],
+                        'name': item['name'],
+                        'screen_name': item['screen_name'],
+                        'is_closed': item['is_closed'],
+                        'type': item['type'],
+                    })
     return result
 
 
